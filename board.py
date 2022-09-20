@@ -1,3 +1,4 @@
+assert_flag = False
 square = {'a1':0, 'b1':1, 'c1':2, 'd1':3, 'e1':4, 'f1':5, 'g1':6, 'h1':7,
           'a2':8, 'b2':9, 'c2':10, 'd2':11, 'e2':12, 'f2':13, 'g2':14, 'h2':15,
           'a3':16, 'b3':17, 'c3':18, 'd3':19, 'e3':20, 'f3':21, 'g3':22, 'h3':23,
@@ -54,15 +55,14 @@ def colrow2Square(col, row): #0-7
     return square[chr(ord('a') + col) + str(row + 1)]
 
 def showBoard():
-    return
     for i in range(7, -1, -1):
         output = str(i + 1)
         for b in board[i*8:(i+1)*8]:
-            output = output + '  ' + piece[b]
-            # output = output + '  ' + b
-        # print(output)
-    # print('   a  b  c  d  e  f  g  h')
-    # print()
+            # output = output + '  ' + piece[b]
+            output = output + '  ' + b
+        print(output)
+    print('   a  b  c  d  e  f  g  h')
+    print()
 
 def resetBoard(): # uppercase: white, lowercase: black
     global board, pinned, king_pos
@@ -126,17 +126,18 @@ def findPinnedPieces(turn, debug=False):
                 break
             elif check_piece != '-':
                 break
+    
 def actLongCastle(turn): # 0-0-0
     if turn == 'w':
         board[:5] = list('--KR-')
         # print(f'0-0-0[{4 * 73 + 12}]')
-        showBoard()
+        # showBoard()
         king_pos[0] = 2
         return 4 * 73 + 12
     else:
         board[56:61] = list('--kr-')
         # print(f'0-0-0[{60 * 73 + 12}]')
-        showBoard()
+        # showBoard()
         king_pos[1] = 58
         return 60 * 73 + 12
 
@@ -144,13 +145,13 @@ def actShortCastle(turn): # 0-0
     if turn == 'w':
         board[4:8] = list('-RK-')
         # print(f'0-0[{4 * 73 + 10}]')
-        showBoard()
+        # showBoard()
         king_pos[0] = 6
         return 4 * 73 + 10
     else:
         board[60:] = list('-rk-')
         # print(f'0-0[{60 * 73 + 10}]')
-        showBoard()
+        # showBoard()
         king_pos[1] = 62
         return 60 * 73 + 10
 
@@ -198,7 +199,7 @@ def actPawn(pawn, move):
         else:
             action_id = move_id[(move_to % 8 - move_from % 8, move_to // 8 - move_from // 8)]
     # print(f'{move}[{move_from * 73 + action_id}]')
-    showBoard()
+    # showBoard()
     return move_from * 73 + action_id
 
 def actKnight(knight, move):
@@ -260,7 +261,7 @@ def actKnight(knight, move):
     board[move_from] = '-'
     board[move_to] = knight
     # print(f'{move}[{move_from * 73 + action_id}]')
-    showBoard()
+    # showBoard()
     return move_from * 73 + action_id
 
 def actBRQ(brq, move):
@@ -287,9 +288,13 @@ def actBRQ(brq, move):
                 from_line = newmove[1]
                 if from_line.isdigit():
                     if from_row != ord(from_line) - ord('1'):
+                        if board[colrow2Square(from_col, from_row)] == brq:
+                            break
                         continue
                 elif from_line.isalpha():
                     if from_col != ord(from_line) - ord('a'):
+                        if board[colrow2Square(from_col, from_row)] == brq:
+                            break
                         continue
             elif len(newmove) == 5:
                 from_square = square[newmove[1:3]]  
@@ -325,7 +330,7 @@ def actBRQ(brq, move):
     board[move_from] = '-'
     board[move_to] = brq
     # print(f'{move}[{move_from * 73 + action_id}]')
-    showBoard()
+    # showBoard()
     return move_from * 73 + action_id
     
 def actKing(king, move):
@@ -352,6 +357,7 @@ def actKing(king, move):
     else:
         king_pos[1] = move_to
     # print(f'{move}[{move_from * 73 + action_id}]')
-    showBoard()
+    # showBoard()
     return move_from * 73 + action_id
 
+# pbzip2 -d lichess_db_standard_rated_2022-01.pgn.bz2

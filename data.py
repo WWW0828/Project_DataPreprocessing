@@ -1,3 +1,4 @@
+import sys
 import board as bd
 game = []
 game_flag = False
@@ -5,8 +6,8 @@ valid_players = set()
 min_blitz, max_blitz = 700, 2600
 min_rapid, max_rapid = 700, 2400
 total_blitz_games, total_rapid_games = 0, 0
-blitz_rating = [0 for i in range((max_blitz - min_blitz)//100)]
-rapid_rating = [0 for i in range((max_rapid - min_rapid)//100)]
+blitz_rating = [0 for i in range((max_blitz - min_blitz)//100 + 1)]
+rapid_rating = [0 for i in range((max_rapid - min_rapid)//100 + 1)]
 game_cnt = 0
 
 def eloNotIn(min_elo, max_elo, elo):
@@ -49,7 +50,7 @@ def appendAGame(append_line):
         game.append(line)
     elif 'UTCDate' in line:
         game.append(line)
-    elif '1.' in line:
+    elif 'Date' not in line and '1.' in line:
         game.append(line)
         if '1-0' in line:
             game.append(1.0)
@@ -71,7 +72,8 @@ def convertGame(game):
     temp_pw, temp_pb = '', ''
     # print(game)
     for game_info in game[:-1]:
-        if 'Event' in game_info:
+        #print(game_info)
+        if 'Event' in game_info[:6]:
             if 'Rapid' in game_info:
                 event = 'Rapid'
                 training_format = f'GM[chess]RE[{result}]EV[Rapid]'
@@ -79,10 +81,10 @@ def convertGame(game):
                 training_format = f'GM[chess]RE[{result}]EV[Blitz]'
             else:
                 return 
-        elif 'UTCDate' in game_info:
+        elif 'UTCDate' in game_info[:8]:
             date = game_info.split('"')[1]
             training_format += f'DT[{date}]'
-        elif 'WhiteElo' in game_info or 'BlackElo' in game_info:
+        elif 'WhiteElo' in game_info[:9] or 'BlackElo' in game_info[:9]:
             rating = game_info.split('"')[1]
             if rating == '?':
                 return
@@ -110,6 +112,7 @@ def convertGame(game):
                 temp_pb = player
                 training_format += f'PB[{player}]'
         elif '1. ' in game_info:
+            move_cnt = 0
             bd.resetBoard()
             moves = game_info.split(' ')
             turn = 'W'
@@ -123,12 +126,26 @@ def convertGame(game):
                     continue
                 if turn == 'W':
                     action_id = whiteID(newmove)
+                    # if temp_pw == 'dhoteabhiram' and temp_pb == 'SS_CHESS_2008':
+                    #     if temp_wr == 1380 and temp_br == 1342:
+                    #         bd.showBoard()
                     training_format += f'W[{action_id}]'
                     turn = 'B'
                 else:
                     action_id = blackID(newmove)
+                    # if temp_pw == 'dhoteabhiram' and temp_pb == 'SS_CHESS_2008':
+                    #     if temp_wr == 1380 and temp_br == 1342:
+                    #         bd.showBoard()
                     training_format += f'B[{action_id}]'
                     turn = 'W'
+                    move_cnt += 1
+                    # if temp_pw == 'dhoteabhiram' and temp_pb == 'SS_CHESS_2008':
+                    #     if temp_wr == 1380 and temp_br == 1342 and move_cnt >= 58:
+                    #         assert 1 != 1
+            if move_cnt <= 10:
+                return
+    # print(game)
+    # if total_blitz_games + total_rapid_games >= 829160:
     print(training_format)
     if event == 'Blitz':
         total_blitz_games += 1
@@ -140,10 +157,11 @@ def convertGame(game):
         rapid_rating[(temp_br - min_rapid)//100] += 1
     valid_players.add(temp_pw)
     valid_players.add(temp_pb)
+    
 
-with open('lichess_db_standard_rated_2013-01.pgn', 'r') as pgn:
-    lines = pgn.readlines()
-    for line in lines:
+with open('database2022/lichess_db_standard_rated_2022-01.pgn', 'r') as pgn:
+    for line in pgn:
+        # print(line)
         appendAGame(line)
         if game_flag:
             convertGame(game)
@@ -151,17 +169,18 @@ with open('lichess_db_standard_rated_2013-01.pgn', 'r') as pgn:
             game_flag = False
             game.clear()     
 
-print('# players:', len(valid_players))
-print('# blitz games:', total_blitz_games)
+
+print('# players:', len(valid_players), file=sys.stderr)
+print('# blitz games:', total_blitz_games, file=sys.stderr)
 s = str(blitz_rating[0])
 for i in blitz_rating[1:]:
     s += ' ' + str(i)
-print('rating distribution: 700-2600')
-print(s)
+print('rating distribution: 700-2600', file=sys.stderr)
+print(s, file=sys.stderr)
 
-print('# rapid games:', total_rapid_games)
+print('# rapid games:', total_rapid_games, file=sys.stderr)
 s = str(rapid_rating[0])
 for i in rapid_rating[1:]:
     s += ' ' + str(i)
-print('rating distribution: 700-2400')
-print(s)
+print('rating distribution: 700-2400', file=sys.stderr)
+print(s, file=sys.stderr)
