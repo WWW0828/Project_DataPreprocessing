@@ -203,10 +203,6 @@ def actPawn(pawn, move):
     return move_from * 73 + action_id
 
 def actKnight(knight, move):
-    # if move == 'Nc3':
-    #     print('king (r,c):', squareID2RC(king_pos[0]))
-    #     findPinnedPieces('W', True)
-    #     print(pinned)
     newmove = removeCheckTakeMate(move)
     move_to = square[newmove[-2:]]
     move_from = -1
@@ -257,6 +253,7 @@ def actKnight(knight, move):
 
     if move_from == -1:
         showBoard()
+        print(f'actKnight: move_from = -1, move[{move}], newmove[{newmove}]')
         assert move_from != -1, f'actKnight: move_from = -1, move[{move}], newmove[{newmove}]'
     board[move_from] = '-'
     board[move_to] = knight
@@ -265,10 +262,6 @@ def actKnight(knight, move):
     return move_from * 73 + action_id
 
 def actBRQ(brq, move):
-    # if move == 'Re3':
-    #     print('king (r,c):', squareID2RC(king_pos[0]))
-    #     findPinnedPieces('W', True)
-    #     print(pinned)
     newmove = removeCheckTakeMate(move)
     move_to = square[newmove[-2:]]
     move_from = -1
@@ -306,19 +299,21 @@ def actBRQ(brq, move):
                         king_row, king_col = squareID2RC(king_pos[0])
                     else:
                         king_row, king_col = squareID2RC(king_pos[1])
+
                     dir_kf = (king_col - from_col, king_row - from_row)
                     if dir_kf[0] == 0:
                         if not dir[0] == 0:
-                            continue
+                            break
                     elif dir_kf[1] == 0:
                         if not dir[1] == 0:
-                            continue
+                            break
                     elif dir_kf[0] * dir_kf[1] > 0:
                         if not dir[0] * dir[1] > 0:
-                            continue
+                            break
                     else:
                         if not dir[0] * dir[1] < 0:
-                            continue
+                            break
+        
                 move_from = colrow2Square(from_col, from_row)
                 action_id = move_id[(to_col - from_col, to_row - from_row)]
                 break
@@ -326,6 +321,7 @@ def actBRQ(brq, move):
             break
     if move_from == -1:
         showBoard()
+        print(f'actBRQ: move_from = -1, move[{move}], newmove[{newmove}]')
         assert move_from != -1, f'actBRQ: move_from = -1, move[{move}], newmove[{newmove}]'
     board[move_from] = '-'
     board[move_to] = brq
@@ -360,4 +356,3 @@ def actKing(king, move):
     # showBoard()
     return move_from * 73 + action_id
 
-# pbzip2 -d lichess_db_standard_rated_2022-01.pgn.bz2

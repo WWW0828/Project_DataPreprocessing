@@ -70,6 +70,7 @@ def convertGame(game):
     event = 'Blitz' 
     temp_wr, temp_br = -1, -1
     temp_pw, temp_pb = '', ''
+    
     # print(game)
     for game_info in game[:-1]:
         #print(game_info)
@@ -126,26 +127,18 @@ def convertGame(game):
                     continue
                 if turn == 'W':
                     action_id = whiteID(newmove)
-                    # if temp_pw == 'dhoteabhiram' and temp_pb == 'SS_CHESS_2008':
-                    #     if temp_wr == 1380 and temp_br == 1342:
-                    #         bd.showBoard()
+                    # bd.showBoard()
                     training_format += f'W[{action_id}]'
                     turn = 'B'
                 else:
                     action_id = blackID(newmove)
-                    # if temp_pw == 'dhoteabhiram' and temp_pb == 'SS_CHESS_2008':
-                    #     if temp_wr == 1380 and temp_br == 1342:
-                    #         bd.showBoard()
+                    # bd.showBoard()
                     training_format += f'B[{action_id}]'
                     turn = 'W'
                     move_cnt += 1
-                    # if temp_pw == 'dhoteabhiram' and temp_pb == 'SS_CHESS_2008':
-                    #     if temp_wr == 1380 and temp_br == 1342 and move_cnt >= 58:
-                    #         assert 1 != 1
             if move_cnt <= 10:
                 return
     # print(game)
-    # if total_blitz_games + total_rapid_games >= 829160:
     print(training_format)
     if event == 'Blitz':
         total_blitz_games += 1
@@ -158,16 +151,17 @@ def convertGame(game):
     valid_players.add(temp_pw)
     valid_players.add(temp_pb)
     
-
+date = False
 with open('database2022/lichess_db_standard_rated_2022-01.pgn', 'r') as pgn:
     for line in pgn:
-        # print(line)
         appendAGame(line)
         if game_flag:
             convertGame(game)
-            game_cnt += 1
+            game_cnt += 1 
+            if (total_blitz_games + total_rapid_games) % 1000000 == 999999:
+                print(f'cnt(btz,rpd):{total_blitz_games}, {total_rapid_games}', file=sys.stderr)  
             game_flag = False
-            game.clear()     
+            game.clear()   
 
 
 print('# players:', len(valid_players), file=sys.stderr)
@@ -184,3 +178,6 @@ for i in rapid_rating[1:]:
     s += ' ' + str(i)
 print('rating distribution: 700-2400', file=sys.stderr)
 print(s, file=sys.stderr)
+
+# GM[chess]RE[-1.0]EV[Blitz]PW[AirForkOne]PB[fantomas1591]DT[2022.01.19]WR[1298]BR[1687]
+# ['[Event "Rated Rapid game"]', '[White "friuly"]', '[Black "Karolox132"]', '[UTCDate "2022.01.01"]', '[WhiteElo "2111"]', '[BlackElo "2112"]'
